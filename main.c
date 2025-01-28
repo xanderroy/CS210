@@ -13,7 +13,7 @@ int main() {
 
         char* command = parse(buffer);
 
-        if (!strcmp(command, "exit")) { //if exit, terminate
+        if (!strcmp(command, "exit\n")) { //if exit, terminate
             break;
         }
     }
