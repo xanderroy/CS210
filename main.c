@@ -9,7 +9,10 @@ int main() {
         printf(">"); //print input prompt
         strcpy(buffer, ""); //clean buffer from any prev input
 
-        fgets(buffer, 511, stdin); //read input
+        if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
+            printf("\n"); //print newline avoids segmentation fault
+            break;
+        }
 
         char* command = parse(buffer);
 
@@ -23,7 +26,7 @@ int main() {
 
 char* parse(char* buffer) {
     char* tokens = strtok(buffer, " "); //creates a pointer to tokens[0][0]
-    printf(tokens);
+    printf("%s", tokens);
 
     /* TODO validate the input */
 
