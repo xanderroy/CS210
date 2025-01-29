@@ -22,17 +22,18 @@ int main() {
         if (!strcmp(command, "exit\n")) { //if exit, terminate
             break;
         }
-        pid_t cpid = fork();
-        if (cpid == 0) {
+        pid_t cpid = fork(); // child process created
+
+        if (cpid == 0) {    // in the child process we created
             printf("child created successfully\n");
-            exit(0); // Kill Child process
+            exit(0); // terminate child process
         }
-        else if (cpid > 0) {
-            printf("Parent: Child Process ID is %d\n", cpid);
-            wait(NULL);
-            printf("Parent: Child has finished\n");
+        else if (cpid > 0) { // in the parent process
+            printf("Parent Process: Child Process ID is %d\n", cpid);
+            wait(NULL); // parent waits till child process is finished
+            printf("Parent Proccess: Child has finished\n");
         }
-        else {
+        else { // child process not created
             printf("Fork failed\n");
         }
     }
