@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> 
+#include <unistd.h>
+#include <sys/wait.h>
 
 char* parse(char* buffer);
 
@@ -19,6 +22,19 @@ int main() {
         if (!strcmp(command, "exit\n")) { //if exit, terminate
             break;
         }
+        pid_t cpid = fork();
+        if (cpid == 0) {
+            printf("child created successfully\n");
+            exit(0); // Kill Child process
+        }
+        else if (cpid > 0) {
+            printf("Parent: Child Process ID is %d\n", cpid);
+            wait(NULL);
+            printf("Parent: Child has finished\n");
+        }
+        else {
+            printf("Fork failed\n");
+        }
     }
 
     return 0; //return no errors
@@ -26,7 +42,7 @@ int main() {
 
 char* parse(char* buffer) {
     char* tokens = strtok(buffer, " "); //creates a pointer to tokens[0][0]
-    printf("%s", tokens);
+    //printf("%s", tokens);
 
     /* TODO validate the input */
 
