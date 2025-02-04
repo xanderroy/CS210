@@ -20,6 +20,7 @@ int main() {
         char* command = parse(buffer);
 
         if (!strcmp(command, "exit")) { //if exit, terminate
+
             break;
         }
         /*
@@ -46,10 +47,18 @@ int main() {
 }
 
 char* parse(char* buffer) {
-    char* tokens = strtok(buffer, " \n><\t;&"); //creates a pointer to tokens[0][0]
-    //printf("%s", tokens);
+    char* tokens[100];
+    const char delims[8] = " \n><\t;&|";
+    char* token = strtok(buffer, delims); 
+
+    for (int i = 0; token != NULL; i++) {
+        printf("%s", token);
+
+        tokens[i] = token;
+        token = strtok(NULL, delims);
+    }
 
     /* TODO validate the input */
 
-    return tokens;
+    return *tokens;
 }
