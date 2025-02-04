@@ -19,30 +19,34 @@ int main() {
 
         char* command = parse(buffer);
 
-        if (!strcmp(command, "exit\n")) { //if exit, terminate
+        if (!strcmp(command, "exit")) { //if exit, terminate
             break;
         }
+        /*
         pid_t cpid = fork(); // child process created
 
-        if (cpid == 0) {    // in the child process we created
-            printf("child created successfully\n");
-            exit(0); // terminate child process
+        if (cpid < 0) {
+            printf("fork failed");
+            return 1;
         }
-        else if (cpid > 0) { // in the parent process
-            printf("Parent Process: Child Process ID is %d\n", cpid);
+
+        if (cpid == 0) {    // in the child process we created
+            //execlp();
+            exit(0);
+        }
+        else{ // in the parent process
+
             wait(NULL); // parent waits till child process is finished
             printf("Parent Proccess: Child has finished\n");
-        }
-        else { // child process not created
-            printf("Fork failed\n");
-        }
+        }*/
+        
     }
 
     return 0; //return no errors
 }
 
 char* parse(char* buffer) {
-    char* tokens = strtok(buffer, " "); //creates a pointer to tokens[0][0]
+    char* tokens = strtok(buffer, " \n><\t;&"); //creates a pointer to tokens[0][0]
     //printf("%s", tokens);
 
     /* TODO validate the input */
