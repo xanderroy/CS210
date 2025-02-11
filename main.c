@@ -6,7 +6,7 @@
 #include "shell.h"
 
 int main() {
-    char* path = getenv("PATH"); //currently not being used
+    //char* path = getenv("PATH"); //currently not being used
 
     char buffer[512]; //stores input from user
 
@@ -17,7 +17,7 @@ int main() {
         strcpy(buffer, ""); //clean buffer from any prev input
 
         for (int i = 0; i < 100; i++) {
-            command[0] = NULL; //this should clear any tokens from the last loop 
+            command[i] = NULL; //this should clear any tokens from the last loop 
         }
 
         if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
