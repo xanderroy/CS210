@@ -90,6 +90,5 @@ void setpath(char** command) {
     }
 
     setenv("PATH", command[1], 1); //overwrite value of path with given argument
-    chdir(command[1]); //set the working directory to the path given
     return;
 }
