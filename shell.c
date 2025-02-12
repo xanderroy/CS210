@@ -30,7 +30,7 @@ void execute(char** command) {
     int status = checkSpecialCommands(command);
 
     if (status == 1) {
-        return; //input empty flag, return to main without doing anything
+        return; //return to main without doing anything
     }
 
     pid_t cpid = fork(); // child process created
@@ -51,12 +51,45 @@ void execute(char** command) {
 
 int checkSpecialCommands(char** command) { 
     if (!strcmp(command[0], "exit")) { //if exit, terminate
+        returnPath();
+
         quick_exit(0); //exit code 0 no errors
     }
 
     if (!strcmp(command[0], "")) { //if the input is empty just reset the loop
-        return 1; //return an integer to say "no input"
+        return 1; //return 1 to mean nothing further to do
+    }
+
+    if (!strcmp(command[0], "getpath")) {
+        getpath(command);
+        return 1;
+    }
+
+    if (!strcmp(command[0], "setpath")) {
+        setpath(command);
+        return 1;
     }
 
     return 0; //return no special commands
+}
+
+void getpath(char** command) {
+    if (command[1] != NULL) {
+        printf("Incorrect number of arguments, usage: getpath\n"); //error
+        return;
+    }
+
+    printf("%s\n", getenv("PATH")); //print current value of the PATH
+    return; 
+}
+
+void setpath(char** command) {
+    if (command[2] != NULL || command[1] == NULL) {
+        printf("Incorrect number of arguments, usage: setpath PATH\n"); //error
+        return;
+    }
+
+    setenv("PATH", command[1], 1); //overwrite value of path with given argument
+    chdir(command[1]); //set the working directory to the path given
+    return;
 }
