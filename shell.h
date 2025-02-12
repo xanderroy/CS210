@@ -3,3 +3,9 @@ void parse(char* buffer, char** tokens);
 void execute(char** command);
 
 int checkSpecialCommands(char** command);
+
+void getpath(char** command);
+
+void setpath(char** command);
+
+void returnPath();

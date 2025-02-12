@@ -5,8 +5,14 @@
 #include <sys/wait.h>
 #include "shell.h"
 
+char* originalPath;
+
 int main() {
-    //char* path = getenv("PATH"); //currently not being used
+    originalPath = getenv("PATH"); //store original path
+
+    char* home = getenv("HOME"); //store home directory
+
+    chdir(home); //go to home directory before anything else
 
     char buffer[512]; //stores input from user
 
@@ -22,6 +28,7 @@ int main() {
 
         if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
             printf("\n"); //print newline avoids segmentation fault
+            returnPath();
             break;
         }
 
@@ -33,3 +40,7 @@ int main() {
     return 0; //return no errors
 }
 
+void returnPath() {
+    setenv("PATH", originalPath, 1);
+    //printf("%s\n", getenv("PATH")); //test that restoring path works (it does)
+}
