@@ -9,3 +9,5 @@ void getpath(char** command);
 void setpath(char** command);
 
 void returnPath();
+
+void cd(char** command);
