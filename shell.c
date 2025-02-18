@@ -104,6 +104,11 @@ void setpath(char** command) {
 }
 
 void cd(char** command){
+    if (command[2] != NULL) {
+        printf("Incorrect number of arguments\n");
+        return;
+    }
+
 	if(command[1] == NULL){
 		char* home = getenv("HOME"); //store home directory
 		if(home == NULL){
@@ -111,13 +116,13 @@ void cd(char** command){
 		} 
 		if(chdir(home) == -1){  // if directory hasnt changed to home
 			perror("cd failed to go home\ncd");
-		}else{ // directory changed
+		} else { // directory changed
 			printf("directory successfully changed to home\n");
 		}
-	}else{ // if second argument passed
+	} else { // if second argument passed
 		if(chdir(command[1]) == -1){ // directory didnt change
 			perror("cd");
-		}else{ // directory changed
+		} else { // directory changed
 			printf("successfully changed to %s \n", command[1]);
 		}
 	}
