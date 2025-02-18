@@ -69,6 +69,11 @@ int checkSpecialCommands(char** command) {
         setpath(command);
         return 1;
     }
+    
+    if (!strcmp(command[0], "cd")) {
+        cd(command);  
+        return 1;
+    }
 
     if (!strcmp(command[0], "cd")) {
         cd(command);
