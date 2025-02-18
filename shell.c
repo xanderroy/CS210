@@ -70,6 +70,11 @@ int checkSpecialCommands(char** command) {
         return 1;
     }
 
+    if (!strcmp(command[0], "cd")) {
+        cd(command);
+        return 1;
+    }
+
     return 0; //return no special commands
 }
 
@@ -91,4 +96,19 @@ void setpath(char** command) {
 
     setenv("PATH", command[1], 1); //overwrite value of path with given argument
     return;
+}
+
+void cd(char** command) {
+    if (command[2] != NULL || command[1] == NULL) {
+        printf("Incorrect number of arguments, usage: cd DIR\n"); //error
+        return;
+    }
+
+    if (!chdir(command[1])) {
+        return;
+    } else {
+        perror("cd");
+        return;
+    }
+    
 }
