@@ -69,6 +69,16 @@ int checkSpecialCommands(char** command) {
         setpath(command);
         return 1;
     }
+    
+    if (!strcmp(command[0], "cd")) {
+        cd(command);  
+        return 1;
+    }
+
+    if (!strcmp(command[0], "cd")) {
+        cd(command);
+        return 1;
+    }
 
     return 0; //return no special commands
 }
@@ -92,3 +102,29 @@ void setpath(char** command) {
     setenv("PATH", command[1], 1); //overwrite value of path with given argument
     return;
 }
+
+void cd(char** command){
+    if (command[2] != NULL) {
+        printf("Incorrect number of arguments\n");
+        return;
+    }
+
+	if(command[1] == NULL){
+		char* home = getenv("HOME"); //store home directory
+		if(home == NULL){
+			perror("cd failure\n");
+		} 
+		if(chdir(home) == -1){  // if directory hasnt changed to home
+			perror("cd failed to go home\ncd");
+		} else { // directory changed
+			printf("directory successfully changed to home\n");
+		}
+	} else { // if second argument passed
+		if(chdir(command[1]) == -1){ // directory didnt change
+			perror("cd");
+		} else { // directory changed
+			printf("successfully changed to %s \n", command[1]);
+		}
+	}
+}
+
