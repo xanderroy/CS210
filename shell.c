@@ -75,6 +75,11 @@ int checkSpecialCommands(char** command) {
         return 1;
     }
 
+    if (!strcmp(command[0], "cd")) {
+        cd(command);
+        return 1;
+    }
+
     return 0; //return no special commands
 }
 
@@ -105,15 +110,16 @@ void cd(char** command){
 			perror("cd failure\n");
 		} 
 		if(chdir(home) == -1){  // if directory hasnt changed to home
-			perror("cd failed to go home\n");
+			perror("cd failed to go home\ncd");
 		}else{ // directory changed
 			printf("directory successfully changed to home\n");
 		}
 	}else{ // if second argument passed
 		if(chdir(command[1]) == -1){ // directory didnt change
-			perror("cd failed to change to the specified directory\n");
+			perror("cd");
 		}else{ // directory changed
 			printf("successfully changed to %s \n", command[1]);
 		}
 	}
 }
+
