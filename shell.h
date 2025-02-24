@@ -11,3 +11,20 @@ void setpath(char** command);
 void returnPath();
 
 void cd(char** command);
+
+void alias(char** command);
+
+void unalias(char** command);
+
+int addAlias(char** command);
+
+void printAliases();
+
+typedef struct alias{
+    char* command;
+    char* alias;
+} Alias;
+
+int removeAlias(char** command);
+
+#define MAX_ALIASES 20
