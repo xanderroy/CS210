@@ -6,8 +6,8 @@
 #include "shell.h"
 
 void parse(char* buffer, char** tokens) {
-    const char delims[8] = " \n><\t;&|"; // Defines delimiters
-    char* token = strtok(buffer, delims); // strtok splits the string into tokens based on the delimiters
+    const char delims[8] = " \n><\t;&|";
+    char* token = strtok(buffer, delims); 
 
     if (token == NULL) { //null terminate the input if the input is empty (segmentation fault prevention)
         tokens[0] = "\0";
@@ -20,7 +20,7 @@ void parse(char* buffer, char** tokens) {
         tokens[i] = malloc(sizeof(char) * strlen(token) + 1); //allocate memory for the tokens (+1 for \0)
         strcpy(tokens[i], token); //copy the token into the array of tokens
         token = strtok(NULL, delims); //get next token
-        ++i; // move to next index in tokens array
+        ++i;
     }
 
     tokens[i] = NULL; //null terminate the array of tokens so execvp doesn't error
@@ -72,6 +72,11 @@ int checkSpecialCommands(char** command) {
     
     if (!strcmp(command[0], "cd")) {
         cd(command);  
+        return 1;
+    }
+
+    if (!strcmp(command[0], "cd")) {
+        cd(command);
         return 1;
     }
 
