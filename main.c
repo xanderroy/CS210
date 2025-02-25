@@ -34,7 +34,9 @@ int main() {
 
         parse(buffer, command); //turn input into tokens
         execute(command); 
-        history_add(command);
+        if (strcmp(command[0], "history") != 0 && command[0][0] != '\0' && command[0][0] != '!' && strcmp(command[0], "clearhistory") != 0 ){
+        	history_add(command);
+    	}
     }
     
     return 0; //return no errors

@@ -78,15 +78,65 @@ int checkSpecialCommands(char** command) {
         cd(command);  
         return 1;
     }
-    //if (!strcmp(command[0], "print")){
-    	//history_print();
-    
+    if (!strcmp(command[0], "history")){
+    	if(command[1] != NULL){
+    		printf("Please enter only one parameter\n");
+    	}else{
+    	history_print();
+    	}
+    	return 1;
+    }
+
+    if (command[0][0] == '!')  { // history invocation started
+    	if (!strcmp(command[0], "!!")) { // re-execute last entered command
+    		if (history_size > 0) {
+        		int last_index = (history_index - 1 + 20) % 20; // go to previous index 
+        		execute(history[last_index]);
+        		return 1;
+    		} else {
+        		printf("No commands in history.\n");
+    			}
+		}
+	else if (command[0][1] != '-'  && isdigit(command[0][1])) { // the handling of the !<no> case
+            	int number = atoi(command[0] + 1);  // Convert from string to integer
+		 if (number > 0 && number <= history_size) {
+		 	int index = (history_index - history_size + number - 1 + 20) % 20; 
+        		execute(history[index]);
+        		return 1;
+   		} else if (number > history_size){
+        		printf("number is greater than size.\n");
+        		return 1;
+    		}else{
+       			printf("Please enter an integer\n");
+       			return 1;
+       		}
+        	}
+         else if (command[0][1] == '-') { // the handling of the !-<no> case
+         	if(isdigit(command[0][2])){
+            		int number = atoi(command[0] + 2);  // convert from string to integer
+			 if (number > 0 && number <= history_size) {
+        			int index = (history_index - number + 20) % 20; 
+        			execute(history[index]);
+        			return 1;
+   			} else {
+        			printf("No command found.\n");
+        			return 1;
+    			}
+       		 }else{
+       			printf("Please enter an integer\n");
+       			return 1;
+       		}
+        }else{
+        	printf("Please enter an integer\n");
+        	return 1;
+        }
+        if (strcmp(command[0], "clearhistory") == 0) {
+    		delete_history();
+    		return 1;
+	}
+	}
 
     
-        	
-   
-           
-
     return 0; //return no special commands
 }
 
@@ -138,24 +188,52 @@ void history_add(char** command){
         	full_command[i] = strdup(command[i]);
         	i++;
     		}
-    	full_command[i] = NULL;
+    	full_command[i] = NULL; // add terminator at the end
 	if (history[history_index] != NULL) {
-        for (int j = 0; history[history_index][j] != NULL; j++) {
-            free(history[history_index][j]);  // Free each token
-        }
-        free(history[history_index]);  // Free the history array itself
-    }
+        	for (int j = 0; history[history_index][j] != NULL; j++) {
+            		free(history[history_index][j]);  // free each token of index after wrap around occurs
+        	}
+        free(history[history_index]); // free index
+    	}
 	history[history_index] = full_command;
-	printf("The command added is: ");
-   	for (int i = 0; history[history_index][i] != NULL; i++) {
-        	printf("%s ", history[history_index][i]);
-    		}
-    	printf("\n");
 	history_index = history_index + 1; 
-	history_index = history_index % 20; // to go back to first element after size becomes max
+	history_index = history_index % 20; // this is to wrap around
 	if(history_size < 20){
 		history_size++;  
 	}
+}
+
+void history_print() {
+    if (history_size == 0) {
+        printf("No commands stored in history.\n");
+        return;
+    }
+    int recent = history_index;
+    for (int i = 0; i < history_size; i++) {
+        int index = (recent -1 - i + 20) % 20; 
+        if (history[index] != NULL) {
+            printf("%d: ", i + 1);
+            for (int j = 0; history[index][j] != NULL; j++) {
+                printf("%s ", history[index][j]);  
+            }
+            printf("\n");
+        }
+    }
+}
+
+void delete_history() {
+    for (int i = 0; i < history_size; i++) {
+        if (history[i] != NULL) {
+            for (int j = 0; history[i][j] != NULL; j++) {
+                free(history[i][j]); 
+            }
+            free(history[i]);
+            history[i] = NULL; 
+        }
+    }
+    //reset variables below
+    history_size = 0;	
+    history_index = 0;  
 }
 
 
