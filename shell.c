@@ -237,9 +237,14 @@ int removeAlias(char** command) {
 }
 
 void printAliases() { 
+    int empty = 1;
     for (int i = 0; i < MAX_ALIASES; i++) {
         if (aliases[i] != NULL) {
             printf("Alias: %s, Command: %s\n", aliases[i]->alias, aliases[i]->command); //just prints the alias and command for each extant alias
+            empty = 0;
         }
+    }
+    if (empty) {
+        printf("No aliases to print\n");
     }
 }
