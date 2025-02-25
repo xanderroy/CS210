@@ -188,7 +188,7 @@ void history_add(char** command){
         	full_command[i] = strdup(command[i]);
         	i++;
     		}
-    	full_command[i] = NULL; // add terminator at the end
+    	full_command[i] = NULL; // make last character null.
 	if (history[history_index] != NULL) {
         	for (int j = 0; history[history_index][j] != NULL; j++) {
             		free(history[history_index][j]);  // free each token of index after wrap around occurs
