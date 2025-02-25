@@ -27,4 +27,4 @@ typedef struct alias{
 
 int removeAlias(char** command);
 
-#define MAX_ALIASES 20
+#define MAX_ALIASES 10
