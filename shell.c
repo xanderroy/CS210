@@ -6,7 +6,7 @@
 #include "shell.h"
 #include <ctype.h>
 
-char* history[20];
+char** history[20];
 int history_size = 0;
 int history_index = 0;
 
@@ -78,43 +78,11 @@ int checkSpecialCommands(char** command) {
         cd(command);  
         return 1;
     }
-    if (!strcmp(command[0], "print")){
-    	history_print();
-    }
+    //if (!strcmp(command[0], "print")){
+    	//history_print();
+    
 
-    if (command[0][0] == '!') {        // history invocation command was entered
-        if (strcmp(command[0], "!!") == 0) { // command to re-execute last command was entered
-            if (history_size > 0) {
-                parse(history[(history_index - 1 + 20) % 20], command); // tokenize last command entered
-       		execute(command);
-            } else {
-                printf("No commands in history.\n");
-            }
-        }
-        
-        else if (command[0][1] != '-' && isdigit(command[0][1])) { // the handling of the !<no> case
-            	int number = atoi(command[0] + 1);	// character after '!' is converted from string to int
-            	if(number > 0 && number <= history_size){
-            		printf("%s\n",history[number]);
-            		parse(history[number],command);
-            		printf("!<num> getting reached!\n");
-           	 }else{
-            		printf("command not found.\n");
-            	 }
-        }
-       	else if (command[0][1] == '-' && isdigit(command[0][2])){
-        	int number = atoi(command[0] + 2);
-        	if(number > 0 && number <= history_size){
-            		int index = (history_index - number + 20) % 20; // retrieve index of the command
-            		parse(history[index],command);
-           	 }else{
-            		printf("command not found.\n");
-            	 }
-        }else{
-        	printf("Wrong history command entered");
-        }
-        return 1;
-        }
+    
         	
    
            
@@ -163,12 +131,26 @@ void cd(char** command){
 }
 
 
-void history_add(char* command){
-	if(history[history_index] != NULL){ //replaces oldest element in the list with newest one if history size is full
-		free(history[history_index]);
-	}
-	history[history_index] = strdup(command); //adds input string to history array
-	//printf("command added to history\n");
+void history_add(char** command){
+	char** full_command = malloc(sizeof(char*) * 100);
+	int i = 0;
+	while (command[i] != NULL) {
+        	full_command[i] = strdup(command[i]);
+        	i++;
+    		}
+    	full_command[i] = NULL;
+	if (history[history_index] != NULL) {
+        for (int j = 0; history[history_index][j] != NULL; j++) {
+            free(history[history_index][j]);  // Free each token
+        }
+        free(history[history_index]);  // Free the history array itself
+    }
+	history[history_index] = full_command;
+	printf("The command added is: ");
+   	for (int i = 0; history[history_index][i] != NULL; i++) {
+        	printf("%s ", history[history_index][i]);
+    		}
+    	printf("\n");
 	history_index = history_index + 1; 
 	history_index = history_index % 20; // to go back to first element after size becomes max
 	if(history_size < 20){
@@ -176,17 +158,7 @@ void history_add(char* command){
 	}
 }
 
-void history_print(){
-	if(history_size == 0){
-		printf("No commands stored in history.\n");
-	}
-	
-	int recent = history_index;
-	for(int i = 0; i < history_size; i++){
-		int index = (recent - 1 - i + 20) % 20;
-	  	printf("%d %s\n",i+1,history[index]);
-		}
-	}
+
 
 
 

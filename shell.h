@@ -12,8 +12,8 @@ void returnPath();
 
 void cd(char** command);
 
-void history_add(char* command);
+void history_add(char** command);
 
-void history_print();
+
 
 
