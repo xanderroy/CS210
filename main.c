@@ -33,8 +33,8 @@ int main() {
         }
 
         parse(buffer, command); //turn input into tokens
-
         execute(command); 
+        history_add(buffer);
     }
     
     return 0; //return no errors
