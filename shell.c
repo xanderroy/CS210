@@ -231,7 +231,7 @@ void delete_history() {
             history[i] = NULL; 
         }
     }
-    //reset variables below
+    //reset variables 
     history_size = 0;	
     history_index = 0;  
 }
