@@ -27,4 +27,8 @@ typedef struct alias{
 
 int removeAlias(char** command);
 
+void saveAliases();
+
+void loadAliases();
+
 #define MAX_ALIASES 10
