@@ -31,7 +31,7 @@ void parse(char* buffer, char** tokens) {
 
 void execute(char** command) {
 
-  // First, check if the command is an alias
+  // First check if the command is an alias
   if (command[0] != NULL && strcmp(command[0], "") != 0) { // check if first token is NULL or empty string
     int i = 0;
     while (i < MAX_ALIASES) { // Loop through all aliases up to MAX_ALIASES
@@ -43,16 +43,25 @@ void execute(char** command) {
 
         // Add additional arguments
         int j = 1;
-        while (command[j] != NULL) {
-          strcat(buffer, " ");
-          strcat(buffer, command[j]);
+        while (command[j] != NULL) { // Iterate through all arguments left
+          strcat(buffer, " "); // Add a space between arguments
+          strcat(buffer, command[j]); // Add the next argument
           j++;
         }
 
+        // Free the command tokens before parsing allocates new memory
+        for (int a = 0; command[a] != NULL; a++) {
+          free(command[a]); // Free allocated memory to the command tokens
+          command[a] = NULL; // Set pointers to NULL
+        }
 
+        // Parse new command
+        parse(buffer, command);
+        break;
       }
       i++;
     }
+  }
 
     int status = checkSpecialCommands(command);
 
