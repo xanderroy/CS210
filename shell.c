@@ -30,6 +30,30 @@ void parse(char* buffer, char** tokens) {
 }
 
 void execute(char** command) {
+
+  // First, check if the command is an alias
+  if (command[0] != NULL && strcmp(command[0], "") != 0) { // check if first token is NULL or empty string
+    int i = 0;
+    while (i < MAX_ALIASES) { // Loop through all aliases up to MAX_ALIASES
+      if (aliases[i] != NULL && !strcmp(aliases[i]->alias, command[0])) { // Check an alias exists at the index then check if the name matches the first token of the command
+
+        // Matching alias found
+        char buffer[1024] = {0}; // Initialise a buffer with zeros
+        strcpy(buffer, aliases[i]->command); // Copy the alias command into the buffer
+
+        // Add additional arguments
+        int j = 1;
+        while (command[j] != NULL) {
+          strcat(buffer, " ");
+          strcat(buffer, command[j]);
+          j++;
+        }
+
+
+      }
+      i++;
+    }
+
     int status = checkSpecialCommands(command);
 
     if (status == 1) {
