@@ -199,11 +199,6 @@ void unalias(char** command) { //handles errors and argument checking
         return;
     }
 
-    if (*aliases == NULL) {
-        printf("No alias to remove\n");
-        return;
-    }
-
     if (!removeAlias(command)) {
         printf("Alias removed\n");
         return;
