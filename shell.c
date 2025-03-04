@@ -88,7 +88,7 @@ void execute(char** command) {
 int checkSpecialCommands(char** command) {
     if (!strcmp(command[0], "exit")) { //if exit, terminate
         returnPath();
-
+        saveAliases();
         quick_exit(0); //exit code 0 no errors
     }
 
@@ -275,4 +275,75 @@ void printAliases() {
     if (empty) {
         printf("No aliases to print\n");
     }
+    return;
+}
+
+void loadAliases() {
+    FILE* file = fopen(".aliases", "r"); 
+    
+    if (file == NULL) { //if the file doesn't exist, do this
+        //perror("Error loading aliases");
+        return;
+    }
+
+    char *rb = malloc(100*sizeof(char));
+
+    int i = 0;
+
+    char* alias[100]; //must be as long as the max alias length permitted earlier to handle long aliases.
+
+    while (fgets(rb, 99, file)) { //get the read buffer from file, then parse it as if it's a command.
+        parse(rb, alias);
+        if (!strcmp(alias[0], "alias")) {
+            addAlias(alias); //just add alias to the array using the old method.
+        } else {
+            printf("Error in .aliases file: Incorrect Format\n");
+            return;
+        }
+        ++i;
+    }
+
+    free(rb);
+    return;
+
+}
+
+//when saving aliases, save the alias command to the file. That way, you can add the alias using the addAlias method later
+
+void saveAliases() {
+    chdir(getenv("HOME")); //go to home dir to save file
+
+    FILE* file = fopen(".aliases", "w"); 
+
+    if (file == NULL) { //if file cannot be opened for whatever reason
+        perror("Could not save aliases");
+        return;
+    }
+
+    int i = 0;
+    
+    char *wb = malloc(100*sizeof(char));
+    
+    while(i != 10 && aliases[i] != NULL) {
+        strcpy(wb, "\0"); //clear old write buffer
+
+        strcpy(wb, "alias "); //copy alias command 
+
+        strcat(wb, aliases[i]->alias); //add alias 
+
+        strcat(wb, " "); //add space for parsing
+
+        strcat(wb, aliases[i]->command); //add aliased command
+
+        strcat(wb, "\0"); //null terminate write buffer
+
+        fputs(wb, file); //write the buffer to file
+
+        fputs("\n", file); //new line
+
+        ++i;
+    }
+
+    free(wb);
+    return;
 }
