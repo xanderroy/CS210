@@ -5,12 +5,12 @@
 #include <sys/wait.h>
 #include "shell.h"
 
-Alias* aliases[MAX_ALIASES] = {NULL}; 
+Alias* aliases[MAX_ALIASES] = {NULL};
 
 
 void parse(char* buffer, char** tokens) {
     const char delims[8] = " \n><\t;&|";
-    char* token = strtok(buffer, delims); 
+    char* token = strtok(buffer, delims);
 
     if (token == NULL) { //null terminate the input if the input is empty (segmentation fault prevention)
         tokens[0] = "\0";
@@ -30,6 +30,39 @@ void parse(char* buffer, char** tokens) {
 }
 
 void execute(char** command) {
+
+  // First check if the command is an alias
+  if (command[0] != NULL && strcmp(command[0], "") != 0) { // check if first token is NULL or empty string
+    int i = 0;
+    while (i < MAX_ALIASES) { // Loop through all aliases up to MAX_ALIASES
+      if (aliases[i] != NULL && !strcmp(aliases[i]->alias, command[0])) { // Check an alias exists at the index then check if the name matches the first token of the command
+
+        // Matching alias found
+        char buffer[1024] = {0}; // Initialise a buffer with zeros
+        strcpy(buffer, aliases[i]->command); // Copy the alias command into the buffer
+
+        // Add additional arguments
+        int j = 1;
+        while (command[j] != NULL) { // Iterate through all arguments left
+          strcat(buffer, " "); // Add a space between arguments
+          strcat(buffer, command[j]); // Add the next argument
+          j++;
+        }
+
+        // Free the command tokens before parsing allocates new memory
+        for (int a = 0; command[a] != NULL; a++) {
+          free(command[a]); // Free allocated memory to the command tokens
+          command[a] = NULL; // Set pointers to NULL
+        }
+
+        // Parse new command
+        parse(buffer, command);
+        break;
+      }
+      i++;
+    }
+  }
+
     int status = checkSpecialCommands(command);
 
     if (status == 1) {
@@ -52,7 +85,7 @@ void execute(char** command) {
     }
 }
 
-int checkSpecialCommands(char** command) { 
+int checkSpecialCommands(char** command) {
     if (!strcmp(command[0], "exit")) { //if exit, terminate
         returnPath();
 
@@ -72,19 +105,19 @@ int checkSpecialCommands(char** command) {
         setpath(command);
         return 1;
     }
-    
+
     if (!strcmp(command[0], "cd")) {
-        cd(command);  
+        cd(command);
         return 1;
     }
 
     if (!strcmp(command[0], "alias")) {
-        alias(command);  
+        alias(command);
         return 1;
     }
 
     if (!strcmp(command[0], "unalias")) {
-        unalias(command);  
+        unalias(command);
         return 1;
     }
 
@@ -98,7 +131,7 @@ void getpath(char** command) {
     }
 
     printf("%s\n", getenv("PATH")); //print current value of the PATH
-    return; 
+    return;
 }
 
 void setpath(char** command) {
@@ -121,7 +154,7 @@ void cd(char** command){
 		char* home = getenv("HOME"); //store home directory
 		if(home == NULL){
 			perror("cd failure\n");
-		} 
+		}
 
 		if(chdir(home) == -1){  // if directory hasnt changed to home
 			perror("cd failed to go home\ncd");
@@ -164,7 +197,7 @@ void alias(char** command) { //handles errors and arguments
 */
 
 int addAlias(char** command) { //insert alias into array of Alias types
-    int i = 0; 
+    int i = 0;
     while (i < MAX_ALIASES) {
         if (aliases[i] == NULL) {
             break;
@@ -178,13 +211,13 @@ int addAlias(char** command) { //insert alias into array of Alias types
     }
 
     char* commandToAlias = malloc(255*sizeof(char) + 1); //allows arguments to be passed with the alias
-    
+
     int j = 2;
     while(command[j] != NULL) {
         strcat(commandToAlias, command[j]); //add all arguments to the aliased command
         strcat(commandToAlias, " ");
         ++j;
-    } 
+    }
 
     aliases[i] = malloc(sizeof(Alias) + 1);
 
@@ -208,12 +241,12 @@ void unalias(char** command) { //handles errors and argument checking
     }
 }
 
-/* 
-    Returns a 0 for success or a 1 for a failure of any kind 
+/*
+    Returns a 0 for success or a 1 for a failure of any kind
 */
 
-int removeAlias(char** command) { 
-    int i = 0; 
+int removeAlias(char** command) {
+    int i = 0;
     while (i < MAX_ALIASES) {
         if (aliases[i] != NULL && !strcmp(aliases[i]->alias, command[1])) { //check if the alias exists in the list
             break;
@@ -231,7 +264,7 @@ int removeAlias(char** command) {
     return 0;
 }
 
-void printAliases() { 
+void printAliases() {
     int empty = 1;
     for (int i = 0; i < MAX_ALIASES; i++) {
         if (aliases[i] != NULL) {
