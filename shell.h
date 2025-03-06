@@ -32,3 +32,10 @@ void saveAliases();
 void loadAliases();
 
 #define MAX_ALIASES 10
+
+void history_add(char** command);
+
+void history_print();
+
+void delete_history();
+
