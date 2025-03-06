@@ -96,6 +96,8 @@ int checkSpecialCommands(char** command) {
 
         saveAliases();
 
+        save_history();
+
         quick_exit(0); //exit code 0 no errors
     }
 
@@ -364,6 +366,8 @@ void loadAliases() {
     }
 
     free(rb);
+    fclose(file);
+
     return;
 
 }
@@ -405,6 +409,8 @@ void saveAliases() {
     }
 
     free(wb);
+
+    fclose(file);
     return;
 }
 

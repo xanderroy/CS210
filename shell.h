@@ -39,3 +39,6 @@ void history_print();
 
 void delete_history();
 
+void save_history(); 
+
+void load_history();

@@ -16,6 +16,8 @@ int main() {
 
     loadAliases();
 
+    load_history();
+
     char buffer[512]; //stores input from user
 
     char* command[100]; //stores the tokenised input as an array of char pointers !! essential for execvp().
