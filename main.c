@@ -28,13 +28,16 @@ int main() {
 
         if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
             printf("\n"); //print newline avoids segmentation fault
+            save_history(); 
             returnPath();
             break;
         }
 
         parse(buffer, command); //turn input into tokens
-
         execute(command); 
+        if (strcmp(command[0], "history") != 0 && command[0][0] != '\0' && command[0][0] != '!' && strcmp(command[0], "clearhistory") != 0 ){
+        	history_add(command);
+    	}
     }
     
     return 0; //return no errors
