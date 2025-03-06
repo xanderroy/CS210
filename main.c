@@ -14,6 +14,8 @@ int main() {
 
     chdir(home); //go to home directory before anything else
 
+    loadAliases();
+
     char buffer[512]; //stores input from user
 
     char* command[100]; //stores the tokenised input as an array of char pointers !! essential for execvp().
@@ -30,6 +32,7 @@ int main() {
             printf("\n"); //print newline avoids segmentation fault
             save_history(); 
             returnPath();
+            saveAliases();
             break;
         }
 

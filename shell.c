@@ -10,9 +10,12 @@ char** history[20];
 int history_size = 0;
 int history_index = 0;
 
+Alias* aliases[MAX_ALIASES] = {NULL};
+
+
 void parse(char* buffer, char** tokens) {
     const char delims[8] = " \n><\t;&|";
-    char* token = strtok(buffer, delims); 
+    char* token = strtok(buffer, delims);
 
     if (token == NULL) { //null terminate the input if the input is empty (segmentation fault prevention)
         tokens[0] = "\0";
@@ -32,6 +35,39 @@ void parse(char* buffer, char** tokens) {
 }
 
 void execute(char** command) {
+
+  // First check if the command is an alias
+  if (command[0] != NULL && strcmp(command[0], "") != 0) { // check if first token is NULL or empty string
+    int i = 0;
+    while (i < MAX_ALIASES) { // Loop through all aliases up to MAX_ALIASES
+      if (aliases[i] != NULL && !strcmp(aliases[i]->alias, command[0])) { // Check an alias exists at the index then check if the name matches the first token of the command
+
+        // Matching alias found
+        char buffer[1024] = {0}; // Initialise a buffer with zeros
+        strcpy(buffer, aliases[i]->command); // Copy the alias command into the buffer
+
+        // Add additional arguments
+        int j = 1;
+        while (command[j] != NULL) { // Iterate through all arguments left
+          strcat(buffer, " "); // Add a space between arguments
+          strcat(buffer, command[j]); // Add the next argument
+          j++;
+        }
+
+        // Free the command tokens before parsing allocates new memory
+        for (int a = 0; command[a] != NULL; a++) {
+          free(command[a]); // Free allocated memory to the command tokens
+          command[a] = NULL; // Set pointers to NULL
+        }
+
+        // Parse new command
+        parse(buffer, command);
+        break;
+      }
+      i++;
+    }
+  }
+
     int status = checkSpecialCommands(command);
 
     if (status == 1) {
@@ -54,9 +90,12 @@ void execute(char** command) {
     }
 }
 
-int checkSpecialCommands(char** command) { 
+int checkSpecialCommands(char** command) {
     if (!strcmp(command[0], "exit")) { //if exit, terminate
         returnPath();
+
+        saveAliases();
+
         quick_exit(0); //exit code 0 no errors
     }
 
@@ -73,9 +112,19 @@ int checkSpecialCommands(char** command) {
         setpath(command);
         return 1;
     }
-    
+
     if (!strcmp(command[0], "cd")) {
-        cd(command);  
+        cd(command);
+        return 1;
+    }
+
+    if (!strcmp(command[0], "alias")) {
+        alias(command);
+        return 1;
+    }
+
+    if (!strcmp(command[0], "unalias")) {
+        unalias(command);
         return 1;
     }
     if (!strcmp(command[0], "history")){
@@ -147,7 +196,7 @@ void getpath(char** command) {
     }
 
     printf("%s\n", getenv("PATH")); //print current value of the PATH
-    return; 
+    return;
 }
 
 void setpath(char** command) {
@@ -165,21 +214,199 @@ void cd(char** command){
 		char* home = getenv("HOME"); //store home directory
 		if(home == NULL){
 			perror("cd failure\n");
-		} 
+		}
+
 		if(chdir(home) == -1){  // if directory hasnt changed to home
 			perror("cd failed to go home\n");
 		}else{ // directory changed
 			printf("directory successfully changed to home\n");
 		}
-	}else{ // if second argument passed
-		if(chdir(command[1]) == -1){ // directory didnt change
-			perror("cd failed to change to the specified directory\n");
-		}else{ // directory changed
+
+	} else { // if second argument passed
+		if (chdir(command[1]) == -1) { // directory didnt change
+			perror("cd");
+		} else { // directory changed
 			printf("successfully changed to %s \n", command[1]);
 		}
 	}
 }
 
+void alias(char** command) { //handles errors and arguments
+    if (command[1] != NULL && command[2] == NULL) {
+        printf("Incorrect number of arguments\n");
+        return;
+    }
+
+    if (command[1] == NULL) {
+        printAliases();
+        return;
+    }
+
+    if (!addAlias(command)) {
+        printf("Alias created\n");
+        return;
+    } else {
+        printf("Error adding alias\n");
+    }
+
+    return;
+}
+
+/*
+    Returns 0 for success, 1 for failure of any kind
+*/
+
+int addAlias(char** command) { //insert alias into array of Alias types
+    int i = 0;
+    while (i < MAX_ALIASES) {
+        if (aliases[i] == NULL) {
+            break;
+        }
+        ++i;
+    }
+
+    if (i == MAX_ALIASES) {
+        printf("Alias max reached, ");
+        return 1;
+    }
+
+    char* commandToAlias = malloc(255*sizeof(char) + 1); //allows arguments to be passed with the alias
+
+    int j = 2;
+    while(command[j] != NULL) {
+        strcat(commandToAlias, command[j]); //add all arguments to the aliased command
+        strcat(commandToAlias, " ");
+        ++j;
+    }
+
+    aliases[i] = malloc(sizeof(Alias) + 1);
+
+    aliases[i]->alias = command[1];
+    aliases[i]->command = commandToAlias;
+    return 0;
+}
+
+void unalias(char** command) { //handles errors and argument checking
+    if (command[1] == NULL || command[2] != NULL) {
+        printf("Incorrect number of arguments\n");
+        return;
+    }
+
+    if (!removeAlias(command)) {
+        printf("Alias removed\n");
+        return;
+    } else {
+        printf("Couldn't remove alias\n");
+        return;
+    }
+}
+
+/*
+    Returns a 0 for success or a 1 for a failure of any kind
+*/
+
+int removeAlias(char** command) {
+    int i = 0;
+    while (i < MAX_ALIASES) {
+        if (aliases[i] != NULL && !strcmp(aliases[i]->alias, command[1])) { //check if the alias exists in the list
+            break;
+        }
+        ++i;
+    }
+
+    if (i == MAX_ALIASES) {
+        printf("Alias not found, ");
+        return 1;
+    }
+
+    free(aliases[i]);
+    aliases[i] = NULL; //simply remove reference to alias and deallocate memory
+    return 0;
+}
+
+void printAliases() {
+    int empty = 1;
+    for (int i = 0; i < MAX_ALIASES; i++) {
+        if (aliases[i] != NULL) {
+            printf("Alias: %s, Command: %s\n", aliases[i]->alias, aliases[i]->command); //just prints the alias and command for each extant alias
+            empty = 0;
+        }
+    }
+    if (empty) {
+        printf("No aliases to print\n");
+    }
+    return;
+}
+
+void loadAliases() {
+    FILE* file = fopen(".aliases", "r"); 
+    
+    if (file == NULL) { //if the file doesn't exist, do this
+        //perror("Error loading aliases");
+        return;
+    }
+
+    char *rb = malloc(100*sizeof(char));
+
+    int i = 0;
+
+    char* alias[100]; //must be as long as the max alias length permitted earlier to handle long aliases.
+
+    while (fgets(rb, 99, file)) { //get the read buffer from file, then parse it as if it's a command.
+        parse(rb, alias);
+        if (!strcmp(alias[0], "alias")) {
+            addAlias(alias); //just add alias to the array using the old method.
+        } else {
+            printf("Error in .aliases file: Incorrect Format\n");
+            return;
+        }
+        ++i;
+    }
+
+    free(rb);
+    return;
+
+}
+
+//when saving aliases, save the alias command to the file. That way, you can add the alias using the addAlias method later
+
+void saveAliases() {
+    chdir(getenv("HOME")); //go to home dir to save file
+
+    FILE* file = fopen(".aliases", "w"); 
+
+    if (file == NULL) { //if file cannot be opened for whatever reason
+        perror("Could not save aliases");
+        return;
+    }
+
+    int i = 0;
+    
+    char *wb = malloc(100*sizeof(char));
+    
+    while(i != 10 && aliases[i] != NULL) {
+        strcpy(wb, "\0"); //clear old write buffer
+
+        strcpy(wb, "alias "); //copy alias command 
+
+        strcat(wb, aliases[i]->alias); //add alias 
+
+        strcat(wb, " "); //add space for parsing
+
+        strcat(wb, aliases[i]->command); //add aliased command
+
+        strcat(wb, "\0"); //null terminate write buffer
+
+        fputs(wb, file); //write the buffer to file
+
+        fputs("\n", file); //new line
+
+        ++i;
+    }
+
+    free(wb);
+    return;
+}
 
 void history_add(char** command){
 	char** full_command = malloc(sizeof(char*) * 100);
@@ -282,10 +509,3 @@ void load_history() {
     }
     fclose(file);
 }
-
-
-
-
-
-
-
