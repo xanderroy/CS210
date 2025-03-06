@@ -28,6 +28,7 @@ int main() {
 
         if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
             printf("\n"); //print newline avoids segmentation fault
+            save_history(); 
             returnPath();
             break;
         }

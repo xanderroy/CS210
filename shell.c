@@ -234,6 +234,53 @@ void delete_history() {
     //reset variables 
     history_size = 0;	
     history_index = 0;  
+} 
+
+void save_history() {
+    char history_file[512];
+    snprintf(history_file, sizeof(history_file), "%s/.hist_list", getenv("HOME"));
+
+    FILE *file = fopen(history_file, "w");
+    if(!file) {
+        perror("Error opening history file for writing");
+        return;
+    }
+
+    int index = history_index - history_size + 20; // Start from oldest command
+    for (int i = 0; i < history_size; i++) {
+        int pos = (index + i) % 20;
+        if (history[pos] != NULL) {
+            for (int j = 0; history[pos][j] != NULL; j++) {
+                fprintf(file, "%s ", history[pos][j]);
+            }
+            fprintf(file, "\n");
+        }
+    }
+    fclose(file);
+}
+
+void load_history() {
+    char history_file[512];
+    snprintf(history_file, sizeof(history_file), "%s/.hist_list", getenv("HOME"));
+
+    FILE * file = fopen(history_file, "r");
+    if (!file) {
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        line[strcspn(line, "\n")] = 0; 
+
+        char *tokens[100] = {NULL};
+        parse(line, tokens);
+        history_add(tokens);
+
+        for (int i = 0; tokens[i] != NULL; i++) {
+            free(tokens[i]);
+        }
+    }
+    fclose(file);
 }
 
 
