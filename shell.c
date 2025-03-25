@@ -129,6 +129,7 @@ int checkSpecialCommands(char** command) {
         unalias(command);
         return 1;
     }
+
     if (!strcmp(command[0], "history")){
     	if(command[1] != NULL){
     		printf("Please enter only one parameter\n");
@@ -138,56 +139,59 @@ int checkSpecialCommands(char** command) {
     	return 1;
     }
 
-    if (command[0][0] == '!')  { // history invocation started
-    	if (!strcmp(command[0], "!!")) { // re-execute last entered command
+    if (!strcmp(command[0], "clearhistory")) {
+    	delete_history();
+    	return 1;
+	}
+
+    if (command[0][0] == '!')  { // history invocation started- history_size
+        if (!strcmp(command[0], "!!")) { // re-execute last entered command
     		if (history_size > 0) {
         		int last_index = (history_index - 1 + 20) % 20; // go to previous index 
         		execute(history[last_index]);
         		return 1;
     		} else {
         		printf("No commands in history.\n");
-    			}
+                return 1;
+    		}
 		}
-	else if (command[0][1] != '-'  && isdigit(command[0][1])) { // the handling of the !<no> case
-            	int number = atoi(command[0] + 1);  // Convert from string to integer
-		 if (number > 0 && number <= history_size) {
-		 	int index = (history_index - history_size + number - 1 + 20) % 20; 
-        		execute(history[index]);
-        		return 1;
-   		} else if (number > history_size){
-        		printf("number is greater than size.\n");
-        		return 1;
-    		}else{
-       			printf("Please enter an integer\n");
-       			return 1;
-       		}
-        	}
-         else if (command[0][1] == '-') { // the handling of the !-<no> case
-         	if(isdigit(command[0][2])){
-            		int number = atoi(command[0] + 2);  // convert from string to integer
-			 if (number > 0 && number <= history_size) {
-        			int index = (history_index - number + 20) % 20; 
-        			execute(history[index]);
-        			return 1;
-   			} else {
-        			printf("No command found.\n");
-        			return 1;
-    			}
-       		 }else{
-       			printf("Please enter an integer\n");
-       			return 1;
-       		}
-        }else{
-        	printf("Please enter an integer\n");
-        	return 1;
-        }
-        if (strcmp(command[0], "clearhistory") == 0) {
-    		delete_history();
-    		return 1;
-	}
-	}
 
-    
+	else if (command[0][1] != '-'  && isdigit(command[0][1])) { // the handling of the !<no> case
+            int number = atoi(command[0] + 1);  // Convert from string to integer
+		    if (number > 0 && number <= history_size) {
+                int index = (history_index - history_size + number - 1 + 20) % 20;     
+        	    execute(history[index]);
+        	    return 1;
+   		    } else if (number > history_size){
+        	    printf("number is greater than size.\n");
+        		return 1;
+    	    }
+            else { 
+                printf("Please enter an integer\n");
+       			return 1;
+       		}
+        }
+
+    else if (command[0][1] == '-') { // the handling of the !-<no> case
+        if(isdigit(command[0][2])){
+        	int number = atoi(command[0] + 2);  // convert from string to integer
+		    if (number > 0 && number <= history_size) {
+        		int index = (history_index - (number)) % 20; 
+        		execute(history[index]);
+    			return 1;
+   			} else {
+        		printf("No command found.\n");
+        		return 1;
+    		}
+       	}
+        else {
+       		printf("Please enter an integer\n");
+       		return 1;
+       	}
+    }
+
+    }
+     
     return 0; //return no special commands
 }
 
@@ -212,6 +216,10 @@ void setpath(char** command) {
 }
 
 void cd(char** command){
+    if (command[2] != NULL) {
+       printf("Incorrect number of arguments, usage: cd DIR\n"); 
+       return;
+    }
 	if(command[1] == NULL){
 		char* home = getenv("HOME"); //store home directory
 		if(home == NULL){
@@ -227,6 +235,8 @@ void cd(char** command){
 	} else { // if second argument passed
 		if (chdir(command[1]) == -1) { // directory didnt change
 			perror("cd");
+            
+            printf("%s\n",command[1]);
 		} else { // directory changed
 			printf("successfully changed to %s \n", command[1]);
 		}
@@ -429,8 +439,8 @@ void history_add(char** command){
         free(history[history_index]); // free index
     	}
 	history[history_index] = full_command;
-	history_index = history_index + 1; 
 	history_index = history_index % 20; // this is to wrap around
+    
 	if(history_size < 20){
 		history_size++;  
 	}
@@ -442,10 +452,10 @@ void history_print() {
         return;
     }
     int recent = history_index;
-    for (int i = 0; i < history_size; i++) {
+    for (int i = history_size; i >= 0; i--) {
         int index = (recent -1 - i + 20) % 20; 
         if (history[index] != NULL) {
-            printf("%d: ", i + 1);
+            printf("%d: ", history_size-i);
             for (int j = 0; history[index][j] != NULL; j++) {
                 printf("%s ", history[index][j]);  
             }
