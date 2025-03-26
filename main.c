@@ -39,11 +39,10 @@ int main() {
         }
 
         parse(buffer, command); //turn input into tokens
-        if (command[0][0] != '\0' && command[0][0] != '!'){
+        execute(command); 
+        if (command[0][0] != '\0' && command[0][0] != '!' && strcmp(command[0], "clearhistory") != 0 ){
         	history_add(command);
     	}
-        execute(command); 
-        
     }
     
     return 0; //return no errors
@@ -51,5 +50,5 @@ int main() {
 
 void returnPath() {
     setenv("PATH", originalPath, 1);
-    printf("%s\n", getenv("PATH")); //test that restoring path works (it does)
+    //printf("%s\n", getenv("PATH")); //test that restoring path works (it does)
 }
