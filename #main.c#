@@ -39,11 +39,10 @@ int main() {
         }
 
         parse(buffer, command); //turn input into tokens
-        if (command[0][0] != '\0' && command[0][0] != '!' && strcmp(command[0], "clearhistory") != 0 ){
+        execute(command); 
+        if (strcmp(command[0], "history") != 0 && command[0][0] != '\0' && command[0][0] != '!' && strcmp(command[0], "clearhistory") != 0 ){
         	history_add(command);
     	}
-        execute(command); 
-        
     }
     
     return 0; //return no errors

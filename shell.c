@@ -139,6 +139,10 @@ int checkSpecialCommands(char** command) {
     }
 
     if (command[0][0] == '!')  { // history invocation started
+        if (command[1] != NULL) {
+            printf("Incorrect number of arguments, usage !<no> OR !-<no> OR !!.\n");
+            return 1;
+        }
     	if (!strcmp(command[0], "!!")) { // re-execute last entered command
     		if (history_size > 0) {
         		int last_index = (history_index - 1 + 20) % 20; // go to previous index 
@@ -146,7 +150,8 @@ int checkSpecialCommands(char** command) {
         		return 1;
     		} else {
         		printf("No commands in history.\n");
-    			}
+                return 1;
+    		}
 		}
 	else if (command[0][1] != '-'  && isdigit(command[0][1])) { // the handling of the !<no> case
             	int number = atoi(command[0] + 1);  // Convert from string to integer
@@ -154,10 +159,13 @@ int checkSpecialCommands(char** command) {
 		 	int index = (history_index - history_size + number - 1 + 20) % 20; 
         		execute(history[index]);
         		return 1;
-   		} else if (number > history_size){
-        		printf("number is greater than size.\n");
+   		    } else if (number > 20) {
+                printf("Number is greater than maximum history size.\n");
+                return 1;
+            } else if (number > history_size){
+        		printf("Number is greater than current size.\n");
         		return 1;
-    		}else{
+    		} else {
        			printf("Please enter an integer\n");
        			return 1;
        		}
@@ -181,10 +189,10 @@ int checkSpecialCommands(char** command) {
         	printf("Please enter an integer\n");
         	return 1;
         }
-        if (strcmp(command[0], "clearhistory") == 0) {
+	}
+	if (strcmp(command[0], "clearhistory") == 0) {
     		delete_history();
     		return 1;
-	}
 	}
 
     
@@ -212,6 +220,10 @@ void setpath(char** command) {
 }
 
 void cd(char** command){
+    if (command[2] != NULL) {
+        printf("Incorrect number of arguments, usage: cd OR cd PATH\n");
+        return;
+    }
 	if(command[1] == NULL){
 		char* home = getenv("HOME"); //store home directory
 		if(home == NULL){
@@ -247,8 +259,6 @@ void alias(char** command) { //handles errors and arguments
     if (!addAlias(command)) {
         printf("Alias created\n");
         return;
-    } else {
-        printf("Error adding alias\n");
     }
 
     return;
@@ -260,15 +270,19 @@ void alias(char** command) { //handles errors and arguments
 
 int addAlias(char** command) { //insert alias into array of Alias types
     int i = 0;
-    while (i < MAX_ALIASES) {
+    while (i < MAX_ALIASES) { 
         if (aliases[i] == NULL) {
             break;
+        }
+        if (!strcmp(command[1], aliases[i]->alias)) {
+            printf("Alias already taken, please unalias and retry.\n");
+            return 1;
         }
         ++i;
     }
 
     if (i == MAX_ALIASES) {
-        printf("Alias max reached, ");
+        printf("Alias max reached.\n");
         return 1;
     }
 
@@ -316,6 +330,11 @@ int removeAlias(char** command) {
         ++i;
     }
 
+    if (aliases[0] == NULL) {
+        printf("Aliases list is empty, ");
+        return 1;
+    }
+
     if (i == MAX_ALIASES) {
         printf("Alias not found, ");
         return 1;
@@ -359,7 +378,7 @@ void loadAliases() {
         if (!strcmp(alias[0], "alias")) {
             addAlias(alias); //just add alias to the array using the old method.
         } else {
-            printf("Error in .aliases file: Incorrect Format\n");
+            printf("Error in .aliases file: Incorrect Format. Did not load aliases.\n");
             return;
         }
         ++i;
@@ -441,11 +460,11 @@ void history_print() {
         printf("No commands stored in history.\n");
         return;
     }
-    int recent = history_index;
+    int start = (history_index - history_size + 20) % 20; 
     for (int i = 0; i < history_size; i++) {
-        int index = (recent -1 - i + 20) % 20; 
+        int index = (start + i) % 20;  
         if (history[index] != NULL) {
-            printf("%d: ", i + 1);
+            printf("%d: ", i + 1);  
             for (int j = 0; history[index][j] != NULL; j++) {
                 printf("%s ", history[index][j]);  
             }
@@ -467,13 +486,14 @@ void delete_history() {
     //reset variables 
     history_size = 0;	
     history_index = 0;  
+    printf("History has been cleared\n");
 } 
 
 void save_history() {
-    char history_file[512];
-    snprintf(history_file, sizeof(history_file), "%s/.hist_list", getenv("HOME"));
+    chdir(getenv("HOME")); //go to home dir to save file
 
-    FILE *file = fopen(history_file, "w");
+    FILE* file = fopen(".hist_list", "w"); 
+
     if(!file) {
         perror("Error opening history file for writing");
         return;
@@ -493,25 +513,16 @@ void save_history() {
 }
 
 void load_history() {
-    char history_file[512];
-    snprintf(history_file, sizeof(history_file), "%s/.hist_list", getenv("HOME"));
-
-    FILE * file = fopen(history_file, "r");
+    FILE * file = fopen(".hist_list", "r");
     if (!file) {
         return;
     }
 
     char line[512];
     while (fgets(line, sizeof(line), file)) {
-        line[strcspn(line, "\n")] = 0; 
-
         char *tokens[100] = {NULL};
         parse(line, tokens);
         history_add(tokens);
-
-        for (int i = 0; tokens[i] != NULL; i++) {
-            free(tokens[i]);
-        }
     }
     fclose(file);
 }
