@@ -42,3 +42,5 @@ void delete_history();
 void save_history(); 
 
 void load_history();
+
+int resolve_alias(char** command, int depth);

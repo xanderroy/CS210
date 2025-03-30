@@ -526,3 +526,35 @@ void load_history() {
     }
     fclose(file);
 }
+
+int resolve_alias(char** command, int depth) {
+    if (depth > 3) {  // Limit to 3 levels of resolution
+        printf("limit exceeded.\n");
+        return 1;
+    }
+    int i = 0;
+    while (i < MAX_ALIASES) {
+        if (aliases[i] != NULL && strcmp(command[0], aliases[i]->alias) == 0) {
+            // Found matching alias
+            char buffer[1024] = {0};  // Buffer to store the resolved command
+            strcpy(buffer, aliases[i]->command);
+            int j = 1;		// add the rest of the arguments
+            while (command[j] != NULL) {
+                strcat(buffer, " ");
+                strcat(buffer, command[j]);
+                j++;
+            }
+
+            // free old command tokens and parse the new resolved command
+            for (int a = 0; command[a] != NULL; a++) {
+                free(command[a]);
+                command[a] = NULL;
+            }
+            parse(buffer, command);  // parse the new command
+            return resolve_alias(command, depth + 1);  // recursively resolve if necessary
+        }
+        i++;
+    }
+    // if no alias is found
+    return 0;
+}
