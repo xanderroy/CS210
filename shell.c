@@ -166,14 +166,18 @@ int checkSpecialCommands(char** command) {
         		printf("Number is greater than current size.\n");
         		return 1;
     		} else {
-       			printf("Please enter an integer\n");
+       			printf("Usage: !<no> OR !-<no>\n");
        			return 1;
        		}
         	}
          else if (command[0][1] == '-') { // the handling of the !-<no> case
          	if(isdigit(command[0][2])){
             		int number = atoi(command[0] + 2);  // convert from string to integer
-			 if (number > 0 && number <= history_size) {
+            if (number > 20) {
+                printf("Number greater than maximum history size.\n");
+                return 1;
+            }
+			if (number > 0 && number <= history_size) {
         			int index = (history_index - number + 20) % 20; 
         			execute(history[index]);
         			return 1;
@@ -182,11 +186,11 @@ int checkSpecialCommands(char** command) {
         			return 1;
     			}
        		 }else{
-       			printf("Please enter an integer\n");
+       			printf("Usage: !<no> OR !-<no>\n");
        			return 1;
        		}
         }else{
-        	printf("Please enter an integer\n");
+        	printf("Usage: !<no> OR !-<no>\n");
         	return 1;
         }
 	}
@@ -238,7 +242,7 @@ void cd(char** command){
 
 	} else { // if second argument passed
 		if (chdir(command[1]) == -1) { // directory didnt change
-			perror("cd");
+			perror(command[1]);
 		} else { // directory changed
 			printf("successfully changed to %s \n", command[1]);
 		}
@@ -329,8 +333,8 @@ int removeAlias(char** command) {
         }
         ++i;
     }
-
-    if (aliases[0] == NULL) {
+    
+    if (aliasesEmpty()) {
         printf("Aliases list is empty, ");
         return 1;
     }
@@ -342,6 +346,15 @@ int removeAlias(char** command) {
 
     free(aliases[i]);
     aliases[i] = NULL; //simply remove reference to alias and deallocate memory
+    return 0;
+}
+
+int aliasesEmpty() {
+    for (int i = 0; ; ++i) {
+        if (aliases[i] != NULL) {
+	    return 1;
+	}
+    }
     return 0;
 }
 
