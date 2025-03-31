@@ -290,8 +290,9 @@ int addAlias(char** command) { //insert alias into array of Alias types
         return 1;
     }
 
-    char* commandToAlias = malloc(255*sizeof(char) + 1); //allows arguments to be passed with the alias
-
+    char* commandToAlias = malloc(1024); //allows arguments to be passed with the alias
+    strcpy(commandToAlias, "");
+    
     int j = 2;
     while(command[j] != NULL) {
         strcat(commandToAlias, command[j]); //add all arguments to the aliased command
@@ -299,10 +300,13 @@ int addAlias(char** command) { //insert alias into array of Alias types
         ++j;
     }
 
-    aliases[i] = malloc(sizeof(Alias) + 1);
+    aliases[i] = malloc(sizeof(Alias));
+    aliases[i]->command = malloc(1024);
+    aliases[i]->command = "\0";
 
-    aliases[i]->alias = command[1];
-    aliases[i]->command = commandToAlias;
+    aliases[i]->alias = strdup(command[1]);
+    aliases[i]->command = strdup(commandToAlias);
+    free(commandToAlias);
     return 0;
 }
 
