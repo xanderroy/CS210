@@ -333,8 +333,8 @@ int removeAlias(char** command) {
         }
         ++i;
     }
-
-    if (aliases[0] == NULL) {
+    
+    if (aliasesEmpty()) {
         printf("Aliases list is empty, ");
         return 1;
     }
@@ -346,6 +346,15 @@ int removeAlias(char** command) {
 
     free(aliases[i]);
     aliases[i] = NULL; //simply remove reference to alias and deallocate memory
+    return 0;
+}
+
+int aliasesEmpty() {
+    for (int i = 0; ; ++i) {
+        if (aliases[i] != NULL) {
+	    return 1;
+	}
+    }
     return 0;
 }
 
