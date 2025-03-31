@@ -27,7 +27,7 @@ int main() {
         strcpy(buffer, ""); //clean buffer from any prev input
 
         for (int i = 0; i < 100; i++) {
-            command[i] = NULL; //this should clear any tokens from the last loop 
+            command[i] = "\0"; //this should clear any tokens from the last loop 
         }
 
         if (fgets(buffer, 511, stdin) == NULL) { //read input and check for EOF (ctrl+d)
