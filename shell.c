@@ -350,12 +350,16 @@ int removeAlias(char** command) {
 }
 
 int aliasesEmpty() {
-    for (int i = 0; ; ++i) {
+    int found = 1;
+    for (int i = 0; i < MAX_ALIASES; ++i) {
+        if (aliases[i] == NULL) {
+            continue;
+        }
         if (aliases[i] != NULL) {
-	    return 1;
-	}
+            found = 0;
+        }
     }
-    return 0;
+    return found;
 }
 
 void printAliases() {
